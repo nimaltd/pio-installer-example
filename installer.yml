@@ -20,11 +20,17 @@ category: timing                   # sensor, storage, display, communication, wi
 provides: []                       # what it gives other libraries: [rtos] for an RTOS
 
 requires:
-  pio_installer: 1.0.0             # the oldest pio-installer that reads this file
+  pio_installer: 2.0.0             # the oldest pio-installer that reads this file;
+                                   # 2.0.0 for run below
   libraries: []                    # other libraries, installed first when missing,
                                    # into lib/ beside it:
-                                   #   - osal >= 1.0.0   no owner means nimaltd
-                                   #   - owner/lib       anyone else's
+                                   #   - osal >= 1.0.0       no owner means nimaltd
+                                   #   - owner/lib           anyone else's
+                                   #   - owner/lib@v1.2.0    a tag, branch or commit
+                                   #   - source: owner/other@v2.0.0
+                                   #     manifest: manifests/other.yml
+                                   #                         for a repository with no
+                                   #                         installer.yml of its own
   peripherals: []                  # hardware it uses, named to the user, such as:
                                    #   - type: i2c
                                    #     note: 400 kHz
@@ -58,6 +64,19 @@ extras:                            # copied as they are, never compiled
   - LICENSE.md
   - NOTICE
   - README.md
+
+# once:                            # the project's own files, made when missing and the
+#   - from: config/partitions.csv  # user's from then on: never replaced or removed;
+#     to: partitions.csv           # to: its place in the project, when not its name
+
+run:                               # steps run once the files are in, each asked first
+  - label: make-id                 # the name typed after --run and --no-run
+    description: Make this board's own ID, include/example_id.h   # shown with the question
+    script: scripts/make_id.py     # Python, run with the installer's own Python,
+                                   # or command: [program, arguments], with no shell
+    args: [include/example_id.h]   # given to the script, in the project's folder;
+                                   # include/ is on the include path of src/
+    unless: include/example_id.h   # skipped when this file is there already
 
 pio:                               # read by pio-installer only, for library.json
   frameworks: ["*"]                # the frameworks it builds with, such as

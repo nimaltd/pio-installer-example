@@ -6,6 +6,8 @@ It does one useful thing. `example_due()` says yes once every `EXAMPLE_PERIOD_MS
 
 It reads no clock of its own: you give it the time with every call, from `millis()`, `HAL_GetTick()` or a count of your own. So it builds with every framework PlatformIO has, and with none at all on the native platform, where it runs on your computer.
 
+It also has a step for pio-installer 2.0.0 to run, so you can see one work: `make-id` makes `include/example_id.h`, the board's own ID, a random number. The installer shows what it runs and asks first.
+
 ---
 
 ## Try the installer with it
@@ -15,6 +17,8 @@ Install the installer once:
 ```bash
 pip install pio-installer
 ```
+
+It needs pio-installer 2.0.0 or newer. `pip install --upgrade pio-installer` brings an older one up to date.
 
 No board is needed. Make a folder for a project, and in it a `platformio.ini` for PlatformIO's native platform, which builds a program for your computer:
 
@@ -29,7 +33,18 @@ Then, from that folder:
 pio-installer nimaltd/pio-installer-example
 ```
 
-Press Enter at its questions, and the library goes into `lib/example/`, with a `library.json` the installer writes for it. Then put this in `src/main.c`:
+Press Enter at its questions, and the library goes into `lib/example/`, with a `library.json` the installer writes for it. Last, it asks about its step:
+
+```
+Run
+  make-id      Make this board's own ID, include/example_id.h
+               python scripts/make_id.py include/example_id.h
+               Run it? [Y/n]:
+Made include/example_id.h: device 4A49F7A1.
+               done
+```
+
+Enter runs it. Then put this in `src/main.c`:
 
 ```c
 #include <stdio.h>
@@ -100,6 +115,20 @@ With STM32Cube, give it `HAL_GetTick()`. With ESP-IDF, `(uint32_t)(esp_timer_get
 
 ### Things to try
 
+**Print the board's ID.** `include/example_id.h` is in the project's `include` folder, which PlatformIO puts on the include path of your `src/`:
+
+```c
+#include "example_id.h"     /* made by the make-id step, this board's own */
+
+printf("device %08lX\n", (unsigned long)EXAMPLE_DEVICE_ID);
+```
+
+```
+device 4A49F7A1
+```
+
+Run the install again, and the step is not asked about: `make-id skipped, include/example_id.h is already there`, so the ID never changes under a board already in use. Delete the file, and the next install asks again. `--run make-id` runs it without asking, `--no-run make-id` leaves it, and `--yes` takes every answer offered, for a script. Nobody to answer, and it is not run.
+
 **Keep a setting through an update.** Open `lib/example/src/example_config.h`, and change the period between its `USER CODE` lines:
 
 ```c
@@ -123,7 +152,7 @@ pio-installer nimaltd/pio-installer-example --with uptime
 example_uptime_t up = example_uptime(millis());   /* up.hours, up.minutes, up.seconds */
 ```
 
-**Uninstall it.** Its files go, and its `library.json`. A configuration header with your settings in it is saved beside them first, as a `.bak`:
+**Uninstall it.** Its files go, and its `library.json`. A configuration header with your settings in it is saved beside them first, as a `.bak`. `include/example_id.h` stays, since it is yours:
 
 ```bash
 pio-installer --uninstall example
@@ -147,7 +176,7 @@ Then anyone installs your library with:
 pio-installer yourname/yourlibrary
 ```
 
-Name the header to include first in `files`, list the frameworks and platforms it really builds with, and put `extern "C"` in every header of C code, as this one has, for a project in C++. The [pio-installer README](https://github.com/nimaltd/pio-installer#for-someone-writing-a-library) has the rest.
+Name the header to include first in `files`, list the frameworks and platforms it really builds with, and put `extern "C"` in every header of C code, as this one has, for a project in C++. `run` lists the steps run after the install, with the script in [`scripts/make_id.py`](scripts/make_id.py). The [pio-installer README](https://github.com/nimaltd/pio-installer#for-someone-writing-a-library) has the rest.
 
 ---
 
