@@ -6,7 +6,7 @@ It does one useful thing. `example_due()` says yes once every `EXAMPLE_PERIOD_MS
 
 It reads no clock of its own: you give it the time with every call, from `millis()`, `HAL_GetTick()` or a count of your own. So it builds with every framework PlatformIO has, and with none at all on the native platform, where it runs on your computer.
 
-It also has a step for pio-installer 2.0.0 to run, so you can see one work: `make-id` makes `include/example_id.h`, the board's own ID, a random number. The installer shows what it runs and asks first.
+It also has a step for pio-installer 2.1.0 to run, so you can see one work: `make-id` makes `include/example_id.h`, the board's own ID, a random number. The installer shows what it runs and asks first. Its script, `tools/make_id.py`, comes into your project's folder as the library's own.
 
 ---
 
@@ -18,7 +18,7 @@ Install the installer once:
 pip install pio-installer
 ```
 
-It needs pio-installer 2.0.0 or newer. `pip install --upgrade pio-installer` brings an older one up to date.
+It needs pio-installer 2.1.0 or newer. `pip install --upgrade pio-installer` brings an older one up to date.
 
 No board is needed. Make a folder for a project, and in it a `platformio.ini` for PlatformIO's native platform, which builds a program for your computer:
 
@@ -38,7 +38,7 @@ Press Enter at its questions, and the library goes into `lib/example/`, with a `
 ```
 Run
   make-id      Make this board's own ID, include/example_id.h
-               python scripts/make_id.py include/example_id.h
+               python tools/make_id.py include/example_id.h
                Run it? [Y/n]:
 Made include/example_id.h: device 4A49F7A1.
                done
@@ -152,7 +152,7 @@ pio-installer nimaltd/pio-installer-example --with uptime
 example_uptime_t up = example_uptime(millis());   /* up.hours, up.minutes, up.seconds */
 ```
 
-**Uninstall it.** Its files go, and its `library.json`. A configuration header with your settings in it is saved beside them first, as a `.bak`. `include/example_id.h` stays, since it is yours:
+**Uninstall it.** Its files go, and its `library.json`. A configuration header with your settings in it is saved beside them first, as a `.bak`. `tools/make_id.py` goes with them, and `include/example_id.h` stays, since it is yours:
 
 ```bash
 pio-installer --uninstall example
@@ -176,7 +176,7 @@ Then anyone installs your library with:
 pio-installer yourname/yourlibrary
 ```
 
-Name the header to include first in `files`, list the frameworks and platforms it really builds with, and put `extern "C"` in every header of C code, as this one has, for a project in C++. `run` lists the steps run after the install, with the script in [`scripts/make_id.py`](scripts/make_id.py). The [pio-installer README](https://github.com/nimaltd/pio-installer#for-someone-writing-a-library) has the rest.
+Name the header to include first in `files`, list the frameworks and platforms it really builds with, and put `extern "C"` in every header of C code, as this one has, for a project in C++. `run` lists the steps run after the install, with the script in [`tools/make_id.py`](tools/make_id.py). The [pio-installer README](https://github.com/nimaltd/pio-installer#for-someone-writing-a-library) has the rest.
 
 ---
 
