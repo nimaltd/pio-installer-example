@@ -1,4 +1,4 @@
-# lib-installer-pio
+# lib-installer-example-pio
 
 A small library made to try [lib-installer](https://github.com/nimaltd/lib-installer) on, and a starting point for making your own library installable into a PlatformIO project.
 
@@ -30,7 +30,7 @@ platform = native
 Then, from that folder:
 
 ```bash
-lib-installer nimaltd/lib-installer-pio
+lib-installer nimaltd/lib-installer-example-pio
 ```
 
 Press Enter at its questions, and the library goes into `lib/example/`, with a `library.json` the installer writes for it. Last, it asks about its step:
@@ -143,7 +143,7 @@ Run the install command again: every file is replaced, and your settings are sti
 **Add a part, and take it out.** `--with uptime` adds `example_uptime.h` and `example_uptime.c`, and their source to `library.json`. `--without uptime` takes them out again.
 
 ```bash
-lib-installer nimaltd/lib-installer-pio --with uptime
+lib-installer nimaltd/lib-installer-example-pio --with uptime
 ```
 
 ```c
@@ -161,7 +161,7 @@ lib-installer --uninstall example
 **Without internet.** Download this repository as a zip, from the green **Code** button, **Download ZIP**, and give the installer the zip instead of the name:
 
 ```bash
-lib-installer D:/Downloads/lib-installer-pio-main.zip
+lib-installer D:/Downloads/lib-installer-example-pio-main.zip
 ```
 
 ---
