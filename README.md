@@ -6,7 +6,11 @@ It does one useful thing. `example_due()` says yes once every `EXAMPLE_PERIOD_MS
 
 It reads no clock of its own: you give it the time with every call, from `millis()`, `HAL_GetTick()` or a count of your own. So it builds with every framework PlatformIO has, and with none at all on the native platform, where it runs on your computer.
 
-It also has a step for the installer to run, so you can see one work: `make-id` makes `include/example_id.h`, the board's own ID, a random number. The installer shows what it runs and asks first. Its script, `tools/make_id.py`, comes into your project's folder as the library's own.
+It also uses what installer.yml gained in 2.0.0 and 4.0.0, so you can see each of them work:
+
+- **A step it runs.** `make-id` makes `include/example_id.h`, the board's own ID, a random number. The installer shows what it runs and asks first. Its script, `tools/make_id.py`, comes into your project's folder as the library's own.
+- **Flags for the whole build.** `-ffunction-sections` and `-fdata-sections`, from `pio.project.build_flags`, go into `build_flags` in your `platformio.ini`, for every environment: each function and variable gets a section of its own, which a linker that drops what nothing uses, as most boards' do, can then drop.
+- **A title and notes.** The flags are in a group under its title, and each has a note. Both land in `platformio.ini` as comments, so whoever opens it sees why the lines are there.
 
 ---
 
@@ -18,7 +22,7 @@ Install the installer once:
 pip install lib-installer
 ```
 
-It needs lib-installer 3.0.0 or newer. `pip install --upgrade lib-installer` brings an older one up to date.
+It needs lib-installer 4.0.0 or newer. `pip install --upgrade lib-installer` brings an older one up to date.
 
 No board is needed. Make a folder for a project, and in it a `platformio.ini` for PlatformIO's native platform, which builds a program for your computer:
 
@@ -33,7 +37,7 @@ Then, from that folder:
 lib-installer nimaltd/lib-installer-example-pio
 ```
 
-Press Enter at its questions, and the library goes into `lib/example/`, with a `library.json` the installer writes for it. Last, it asks about its step:
+Press Enter at its questions, and the library goes into `lib/example/`, with a `library.json` the installer writes for it, and its flags go into `platformio.ini`. Last, it asks about its step:
 
 ```
 Run
@@ -115,6 +119,25 @@ With STM32Cube, give it `HAL_GetTick()`. With ESP-IDF, `(uint32_t)(esp_timer_get
 
 ### Things to try
 
+**Look at what it wrote.** Its flags sit in `build_flags` between two lines naming it, so you can find them, under their title between two lines of stars, each note a comment above its flag. The next install writes them again, and an uninstall takes them out, with the `[env]` section the installer added:
+
+```ini
+[env]
+build_flags =
+    ; >>> lib-installer: example >>>
+    ; ******************************************************************************
+    ; Sections the linker can drop when nothing uses them
+    ; ******************************************************************************
+    ; a section for each function
+    -ffunction-sections
+    ; and one for each variable
+    -fdata-sections
+    ; <<< lib-installer: example <<<
+
+[env:native]
+platform = native
+```
+
 **Print the board's ID.** `include/example_id.h` is in the project's `include` folder, which PlatformIO puts on the include path of your `src/`:
 
 ```c
@@ -152,7 +175,7 @@ lib-installer nimaltd/lib-installer-example-pio --with uptime
 example_uptime_t up = example_uptime(millis());   /* up.hours, up.minutes, up.seconds */
 ```
 
-**Uninstall it.** Its files go, and its `library.json`. A configuration header with your settings in it is saved beside them first, as a `.bak`. `tools/make_id.py` goes with them, and `include/example_id.h` stays, since it is yours:
+**Uninstall it.** Its files go, its `library.json`, and its lines in `platformio.ini`. A configuration header with your settings in it is saved beside them first, as a `.bak`. `tools/make_id.py` goes with them, and `include/example_id.h` stays, since it is yours:
 
 ```bash
 lib-installer --uninstall example
@@ -168,7 +191,7 @@ lib-installer D:/Downloads/lib-installer-example-pio-main.zip
 
 ## Make your own library installable
 
-Copy [`installer.yml`](installer.yml) to the root of your library's repository, and change what is yours: its name, its description, its repository, its files, and the `pio` part that `library.json` is written from. Every key the installer reads is in it, with a comment saying what it does; the ones this library has no use for are commented out. Only `name` and `files` are required.
+Copy [`installer.yml`](installer.yml) to the root of your library's repository, and change what is yours: its name, its description, its repository, its files, and the `pio` part. Every key the installer reads is in it, with a comment saying what it does; the ones this library has no use for are commented out. Only `name` and its `headers` or `sources` are required.
 
 Then anyone installs your library with:
 
@@ -176,7 +199,7 @@ Then anyone installs your library with:
 lib-installer yourname/yourlibrary
 ```
 
-Name the header to include first in `files`, list the frameworks and platforms it really builds with, and put `extern "C"` in every header of C code, as this one has, for a project in C++. `run` lists the steps run after the install, with the script in [`tools/make_id.py`](tools/make_id.py). The [lib-installer README](https://github.com/nimaltd/lib-installer#for-someone-writing-a-library) has the rest.
+Name the header to include first under `headers`. What the library writes sits under where it goes: `pio.project.build_flags` for the flags it needs in your `platformio.ini`, and `pio.library` for its `library.json`, where you list the frameworks and platforms it really builds with. Put `extern "C"` in every header of C code, as this one has, for a project in C++. `run` lists the steps run after the install, with the script in [`tools/make_id.py`](tools/make_id.py). The [lib-installer README](https://github.com/nimaltd/lib-installer#for-someone-writing-a-library) has the rest.
 
 ---
 

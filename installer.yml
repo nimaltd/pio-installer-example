@@ -9,9 +9,12 @@
 # There is no version here. The installer reads it from the @version tag in
 # the first header listed, so the source files are the only place it is written.
 #
-# Written for 3.0.0: every file keeps the path it has here, src/example.h
+# Written for 4.0.0: every file keeps the path it has here, src/example.h
 # lands at lib/example/src/example.h, and every path naming a place in the
-# project starts at the project's folder.
+# project starts at the project's folder. What the library writes sits under
+# where it goes, pio.project for the project's platformio.ini and pio.library
+# for its own library.json, and a list of flags can be given in groups under
+# their titles, a flag with a note.
 
 name: example                      # the library's name, and its folder in lib/
 description: A period that never blocks, made to try lib-installer on
@@ -27,7 +30,7 @@ category: timing                   # sensor, storage, display, communication, wi
 provides: []                       # what it gives other libraries: [rtos] for an RTOS
 
 requires:
-  lib_installer: 3.0.0             # the oldest lib-installer that reads this file
+  lib_installer: 4.0.0             # the oldest lib-installer that reads this file
   libraries: []                    # other libraries, installed first when missing,
                                    # into lib/ beside it:
                                    #   - osal >= 1.0.0       no owner means nimaltd
@@ -87,11 +90,20 @@ run:                               # steps run once the files are in, each asked
                                    # include/ is on the include path of src/
     unless: include/example_id.h   # skipped when this file is there already
 
-pio:                               # read by lib-installer only, for library.json
-  frameworks: ["*"]                # the frameworks it builds with, such as
+pio:                               # read by lib-installer only
+  project:                         # written into the project's platformio.ini
+    build_flags:                   # flags for every file of the build, in the library's
+                                   # block of build_flags, after its defines
+      Sections the linker can drop when nothing uses them:
+        - -ffunction-sections: a section for each function
+        - -fdata-sections: and one for each variable
+                                   # a title, between two lines of stars, and a note,
+                                   # written as ; comments above their lines
+  library:                         # written into its own library.json
+    frameworks: ["*"]              # the frameworks it builds with, such as
                                    # [arduino, espidf]; * for any
-  platforms: ["*"]                 # the platforms it builds for, such as
+    platforms: ["*"]               # the platforms it builds for, such as
                                    # [espressif32, ststm32]; * for any
-  # dependencies:                  # PlatformIO Registry libraries it needs, as owner/name,
-  #   - bblanchon/ArduinoJson@^7   # with @version when one is needed. PlatformIO
+    # dependencies:                # PlatformIO Registry libraries it needs, as owner/name,
+    #   - bblanchon/ArduinoJson@^7 # with @version when one is needed. PlatformIO
                                    # installs them by itself at the next build
